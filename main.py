@@ -2,6 +2,7 @@ from bs4 import BeautifulSoup
 from glob import glob
 import pandas as pd
 import csv
+from typing import Dict, List
 
 
 def main():
@@ -12,7 +13,7 @@ def main():
     write_csv(items_set)
 
 
-def get_soups():
+def get_soups() -> List[BeautifulSoup]:
     '''html ディレクトリに保存しておいた html を読み込んで、BeautifulSoup オブジェクトのリストに変換する。'''
     soups = []
     for filename in glob('html/*.html'):
@@ -22,17 +23,18 @@ def get_soups():
     return soups
 
 
-def create_items(soup):
+def create_items(soup: BeautifulSoup) -> List[Dict[str, str]]:
     '''1ページ分の BeautifulSoup オブジェクトを受け取り、サークルデータを抽出してリストを作る。'''
     items = soup.select('.circle_list_item')
     items = map(convert_item, items)
     return items
 
 
-def convert_item(item):
+def convert_item(item: BeautifulSoup) -> Dict[str, str]:
     '''1サークル分の BeautifulSoup オブジェクトを受け取って、保存するデータを抽出する。'''
     new = {}
     new['id'] = item.select('input.CircleId')[0]['value']
+    # .CurrentCheckColor
     new['circle_space'] = item.select('.CircleSpace')[0].text
     new['work'] = item.select('.ArtifactTitle')[0].text
     new['cp'] = item.select('.ArtifactTendency')[0].text
@@ -42,14 +44,15 @@ def convert_item(item):
     new['manga'] = item.select('.CircleIsManga')[0].text
     new['novel'] = item.select('.CircleIsNovel')[0].text
     new['r18'] = item.select('.CircleR18')[0].text
-    new['circle_cut'] = item.select('.CircleCut')[0]['src']
-    new['twitter'] = item.select('.icon-twitter')[0].parent['href']
-    new['website'] = item.select('.icon-homepage')[0].parent['href']
-    new['pixiv'] = item.select('.icon-pixiv')[0].parent['href']
+    # .ChecklistMemo
+    new['circle_cut_url'] = item.select('.CircleCut')[0]['src']
+    new['twitter_url'] = item.select('.icon-twitter')[0].parent['href']
+    new['website_url'] = item.select('.icon-homepage')[0].parent['href']
+    new['pixiv_url'] = item.select('.icon-pixiv')[0].parent['href']
     return new
 
 
-def write_csv(items_set):
+def write_csv(items_set: List[List[Dict[str, str]]]):
     '''アイテムセットを panndas.DataFrame に変換して csv 形式で保存する。'''
     header = (
         'id',
