@@ -13,6 +13,7 @@ def main():
 
 
 def get_soups():
+    '''html ディレクトリに保存しておいた html を読み込んで、BeautifulSoup オブジェクトのリストに変換する。'''
     soups = []
     for filename in glob('html/*.html'):
         with open(filename) as f:
@@ -22,12 +23,14 @@ def get_soups():
 
 
 def create_items(soup):
+    '''1ページ分の BeautifulSoup オブジェクトを受け取り、サークルデータを抽出してリストを作る。'''
     items = soup.select('.circle_list_item')
     items = map(convert_item, items)
     return items
 
 
 def convert_item(item):
+    '''1サークル分の BeautifulSoup オブジェクトを受け取って、保存するデータを抽出する。'''
     new = {}
     new['id'] = item.select('input.CircleId')[0]['value']
     new['circle_space'] = item.select('.CircleSpace')[0].text
@@ -47,6 +50,7 @@ def convert_item(item):
 
 
 def write_csv(items_set):
+    '''アイテムセットを panndas.DataFrame に変換して csv 形式で保存する。'''
     header = (
         'id',
         'circle_space',
